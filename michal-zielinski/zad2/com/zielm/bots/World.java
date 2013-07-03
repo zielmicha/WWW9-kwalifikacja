@@ -48,6 +48,10 @@ public class World {
             return y;
         }
 
+        public int getDir() {
+            return dir;
+        }
+
         public Bot(int x, int y, int id) {
             this.x = x;
             this.y = y;
@@ -143,14 +147,8 @@ public class World {
     }
 
     private void hit(Bot b) {
-        int dir = 1;
-        int botDir = b.dir;
-        if(botDir == 2 || botDir == 3) {
-            botDir %= 2;
-            dir *= -1;
-        }
-        int x = botDir == 1 ? dir : 0;
-        int y = botDir == 0 ? dir : 0;
+        Vector v = Vector.fromDirection(b.dir);
+        int x = v.x, y = v.y;
         shootAtField(b.x + x, b.y + y, b);
         shootAtField(b.x + x + y, b.y + y + x, b);
         shootAtField(b.x + x - y, b.y + y - x, b);
@@ -180,15 +178,8 @@ public class World {
     }
 
     private void tryMove(Bot bot, int dir) {
-        // code duplication, but no tuples in Java :(
-        int botDir = bot.dir;
-        if(botDir == 2 || botDir == 3) {
-            botDir %= 2;
-            dir *= -1;
-        }
-        int x = botDir == 1 ? dir : 0;
-        int y = botDir == 0 ? dir : 0;
-        tryMoveTo(bot, bot.x + x, bot.y + y);
+        Vector v = Vector.fromDirection(bot.dir);
+        tryMoveTo(bot, bot.x + v.x * dir, bot.y + v.y * dir);
     }
 
     private void tryMoveTo(Bot bot, int newX, int newY) {

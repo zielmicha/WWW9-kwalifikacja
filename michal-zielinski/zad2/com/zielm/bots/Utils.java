@@ -12,4 +12,12 @@ public class Utils {
             throw new RuntimeException(ex);
         }
     }
+
+    public static int sign(int v) {
+        return v == 0 ? 0 : (v < 0 ? -1 : 1);
+    }
+
+    public static boolean sameSign(int a, int b) {
+        return sign(a) == sign(b);
+    }
 }

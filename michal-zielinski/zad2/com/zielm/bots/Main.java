@@ -5,6 +5,7 @@ public class Main {
         testAI(new RandomAI(191));
         testAI(new AlwaysShootAI());
         testAI(new RunAndShootAI());
+        testAI(new FollowAndShootAI());
     }
 
     public static void testAI(BotAI ai) {
