@@ -24,4 +24,8 @@
   <target name="run" depends="jar">
     <java classname="com/zielm/bots/Main" fork="true" classpath="game.jar" />
   </target>
+
+  <target name="animate" depends="jar">
+    <java classname="com/zielm/bots/Animator" fork="true" classpath="game.jar" />
+  </target>
 </project>
