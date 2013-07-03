@@ -31,9 +31,21 @@ public class World {
             }
         }
 
+        public char getIdLetter() {
+            return (char)((int)'A' + id - 1);
+        }
+
         private void changeDir(int delta) {
             dir += delta;
             dir = mod(dir, 4);
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
         }
 
         public Bot(int x, int y, int id) {
@@ -57,8 +69,8 @@ public class World {
         }
 
         public String toString() {
-            return String.format("<Bot at %d pos=(%d,%d) hp=%d>",
-                                 System.identityHashCode(this),
+            return String.format("<Bot %c pos=(%d,%d) hp=%d>",
+                                 getIdLetter(),
                                  x, y, hp);
         }
     }
@@ -67,6 +79,10 @@ public class World {
         Bot bot = new Bot(x, y, botOrder.size() + 1);
         ais.put(bot, ai);
         botOrder.add(bot);
+    }
+
+    public List<Bot> getBots() {
+        return Collections.unmodifiableList(botOrder);
     }
 
     public void simulate(Runnable runBetweenSteps) {
@@ -81,7 +97,8 @@ public class World {
                 BotAction actionToTake = expectedActions.get(bot).removeFirst();
                 takeAction(bot, actionToTake);
             }
-            runBetweenSteps.run();
+            if(runBetweenSteps != null)
+                runBetweenSteps.run();
         }
     }
 
@@ -93,13 +110,22 @@ public class World {
         return count;
     }
 
+    public Bot getAliveBot() {
+        for(Bot bot: botOrder) {
+            if(bot.isAlive()) return bot;
+        }
+        return null;
+    }
+
     private void takeAction(Bot bot, BotAction action) {
         //System.err.printf("%s does %s\n", bot, action);
         if(!bot.isAlive()) return;
         switch(action) {
         case SHOOT:
+            shoot(bot);
             break;
         case HIT:
+            hit(bot);
             break;
         case FORWARD:
             tryMove(bot, 1);
@@ -116,6 +142,33 @@ public class World {
         }
     }
 
+    private void hit(Bot b) {
+        int dir = 1;
+        int botDir = b.dir;
+        if(botDir == 2 || botDir == 3) {
+            botDir %= 2;
+            dir *= -1;
+        }
+        int x = botDir == 1 ? dir : 0;
+        int y = botDir == 0 ? dir : 0;
+        shootAtField(b.x + x, b.y + y, b);
+        shootAtField(b.x + x + y, b.y + y + x, b);
+        shootAtField(b.x + x - y, b.y + y - x, b);
+    }
+
+    private void shoot(Bot b) {
+        boolean useX = (b.dir % 2) == 1;
+        for(int z=0; z<(useX?w:h); z++) {
+            shootAtField(useX?z:b.x, useX?b.y:z, b);
+        }
+    }
+
+    private void shootAtField(int x, int y, Bot ifNot) {
+        Bot found = getBotAt(x, y);
+        if(found != null && found != ifNot)
+            found.hp --;
+    }
+
     public Bot getBotAt(int x, int y) {
         x = mod(x, w);
         y = mod(y, h);
@@ -127,6 +180,7 @@ public class World {
     }
 
     private void tryMove(Bot bot, int dir) {
+        // code duplication, but no tuples in Java :(
         int botDir = bot.dir;
         if(botDir == 2 || botDir == 3) {
             botDir %= 2;
