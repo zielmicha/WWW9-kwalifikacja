@@ -98,8 +98,10 @@ public class World {
         }
         for(int i=0; i<numberOfSteps; i++) {
             for(Bot bot: botOrder) {
-                BotAction actionToTake = expectedActions.get(bot).removeFirst();
-                takeAction(bot, actionToTake);
+                if(bot.hp > i) {
+                    BotAction actionToTake = expectedActions.get(bot).removeFirst();
+                    takeAction(bot, actionToTake);
+                }
             }
             if(runBetweenSteps != null)
                 runBetweenSteps.run();
